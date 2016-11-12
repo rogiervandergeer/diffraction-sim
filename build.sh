@@ -5,7 +5,8 @@ set -e
 ESDK=${EPIPHANY_HOME}
 ELIBS="-L ${ESDK}/tools/host/lib"
 EINCS="-I ${ESDK}/tools/host/include"
-ELDF=${ESDK}/bsps/current/internal.ldf
+ELDF="-T ${ESDK}/bsps/current/internal.ldf"
+INC="-I inc/"
 
 # Create binary dir
 if [ ! -d bin ]; then
@@ -13,7 +14,8 @@ if [ ! -d bin ]; then
 fi
 
 # Build host app
-gcc main.c -o bin/main.elf ${EINCS} ${ELIBS} -le-hal -le-loader -lpthread
+gcc src/main.c -o bin/main.elf ${INC} ${EINCS} ${ELIBS}\
+        -le-hal -le-loader -lpthread
 
 # Build device app
-e-gcc -T ${ELDF} -O0 emain.c -o emain.elf -le-lib -lm
+e-gcc ${INC} ${ELDF} -O0 src/emain.c -o bin/emain.elf -le-lib -lm
