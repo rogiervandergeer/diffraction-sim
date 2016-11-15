@@ -114,7 +114,7 @@ int get_state(const int coreid) {
 void read(const int core_id, FILE* of) {
     Result result;
     e_read(&dev, core_id/4, core_id%4, OFFSET_RES, &result, sizeof(Result));
-    fprintf(stdout, "Read (%02d, %02d) from core %02d (p=%i)\n",
+    fprintf(stdout, "Read   (%03d, %03d) from core %02d (p=%i)\n",
             req.col_id[core_id], req.row_id[core_id], 
             core_id, n_pixels(req.col_id[core_id]));
     int pixel;
@@ -171,7 +171,7 @@ int load_def(FILE* fp) {
 
 void assign(const unsigned core_id,
         const int col_id, const int row_id) {
-    fprintf(stdout, "Assign (%02d, %02d) to core %02d (p=%i)\n",
+    fprintf(stdout, "Assign (%03d, %03d)   to core %02d (p=%i)\n",
             col_id, row_id, core_id, n_pixels(col_id));
     req.order[core_id] = O_RUN;
     req.col_id[core_id] = col_id;
@@ -232,11 +232,10 @@ int main(int argc, char * argv[]) {
 
     init_workgroup(&dev);
     init_sequence();
-    print_status();
 
     FILE *fp, *of;
-    fp = fopen("./defs/example.csv", "r");
-    of = fopen("./output/example.dat", "w");
+    fp = fopen("./defs/large.csv", "r");
+    of = fopen("./output/large.dat", "w");
 
     while (load_def(fp)) {
         run(of);
