@@ -21,4 +21,4 @@ gcc src/main.c -o bin/main.elf ${INC} ${EINCS} ${ELIBS}\
         -le-hal -le-loader -lpthread
 
 # Build device app
-e-gcc ${INC} ${ELDF} -O0 src/emain.c -o bin/emain.elf -le-lib -lm
+e-gcc ${INC} ${ELDF} -O2 src/emain.c -o bin/emain.elf -le-lib -lm
