@@ -106,8 +106,8 @@ void process() {
                         + dim(sensor_delta, def->sensor.dimension, q);
                     d2 = distance(&plate, &sensor);
                     double w = (d1+d2)/def->wavelength;
-                    res->data[q].x += sin(w);
-                    res->data[q].y += cos(w);
+                    res->data[q-q_start].x += sin(w);
+                    res->data[q-q_start].y += cos(w);
                 }
             }
         }

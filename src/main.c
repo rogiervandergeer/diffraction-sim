@@ -88,9 +88,9 @@ void halt_sequence() {
     }
 }
 
-unsigned n_pixels(row_id) {
-    if (row_id == n_rows-1) {
-        return def.sensor.dimension-(row_id*BLOCK_SIZE);
+unsigned n_pixels(col_id) {
+    if (col_id == n_cols-1) {
+        return def.sensor.dimension-(col_id*BLOCK_SIZE);
     } else {
         return BLOCK_SIZE;
     }
@@ -111,23 +111,19 @@ int get_state(const int coreid) {
     return retval;
 }
 
-
-void print_data(const int core_id) {
-    Result result;
-    e_read(&dev, core_id/4, core_id%4, OFFSET_RES, &result, sizeof(Result));
-    int x;
-    for (x=0; x<req.pixels[core_id]; ++x) {
-        //        fprintf(stdout, "field %02i: %f, %f\n", 
-        //                x, result.data[x].x, result.data[x].y);
-    }
-}
-
-void read(const int core_id) {
+void read(const int core_id, FILE* of) {
     Result result;
     e_read(&dev, core_id/4, core_id%4, OFFSET_RES, &result, sizeof(Result));
     fprintf(stdout, "Read (%02d, %02d) from core %02d (p=%i)\n",
             req.col_id[core_id], req.row_id[core_id], 
-            core_id, n_pixels(req.row_id[core_id]));
+            core_id, n_pixels(req.col_id[core_id]));
+    int pixel;
+    for (pixel=0; pixel<n_pixels(req.col_id[core_id]); ++pixel) {
+        fprintf(of, "%i, %i, %i, %lf, %lf\n", 
+                req.block_id, req.col_id[core_id]*BLOCK_SIZE+pixel, 
+                req.row_id[core_id],
+                result.data[pixel].x, result.data[pixel].y);
+    }
 }
 
 
@@ -147,7 +143,7 @@ void calc(const PlateDef* pd) {
             } else{
                 t = 1;
             }
-    //        fprintf(stdout, "x, y, t = %f, %f, %i (rsq=%f)\n", x, y, t, rsq); 
+            //        fprintf(stdout, "x, y, t = %f, %f, %i (rsq=%f)\n", x, y, t, rsq); 
             def.transparency[i*PLATE_SIZE+j] = (char) t;
         }
     }
@@ -176,18 +172,18 @@ int load_def(FILE* fp) {
 void assign(const unsigned core_id,
         const int col_id, const int row_id) {
     fprintf(stdout, "Assign (%02d, %02d) to core %02d (p=%i)\n",
-            col_id, row_id, core_id, n_pixels(row_id));
+            col_id, row_id, core_id, n_pixels(col_id));
     req.order[core_id] = O_RUN;
     req.col_id[core_id] = col_id;
     req.row_id[core_id] = row_id;
-    req.pixels[core_id] = n_pixels(row_id);
+    req.pixels[core_id] = n_pixels(col_id);
     push_request();
 }
 
-void run() { 
-    n_cols = def.sensor.dimension;
-    n_rows = def.sensor.dimension / BLOCK_SIZE;
-    if (def.sensor.dimension % BLOCK_SIZE > 0) ++n_rows;
+void run(FILE* of) { 
+    n_cols = def.sensor.dimension / BLOCK_SIZE;
+    n_rows = def.sensor.dimension;
+    if (def.sensor.dimension % BLOCK_SIZE > 0) ++n_cols;
 
     int col_id = 0;
     int row_id = 0;
@@ -201,24 +197,24 @@ void run() {
                 continue;
             }
             if (get_state(core_id) == S_DONE) {
-                read(core_id);
+                read(core_id, of);
                 clear(core_id);
             }
-            usleep(10);
+            usleep(1);
             if (get_state(core_id) == S_WAIT) {
-                if (row_id < n_rows) {
+                if (col_id < n_cols) {
                     assign(core_id, col_id, row_id);
-                    ++col_id;
-                    if (col_id == n_cols) {
-                        col_id = 0;
-                        ++row_id;
+                    ++row_id;
+                    if (row_id == n_rows) {
+                        row_id = 0;
+                        ++col_id;
                     }
                     n_running += 1;
                 }
             }
         }
-        if ((n_running == 0) && (row_id >= n_rows)) break;
-        sleep(1);
+        if ((n_running == 0) && (col_id >= n_cols)) break;
+        usleep(10);
     }
     fprintf(stdout, "Done.\n");
 }
@@ -238,17 +234,17 @@ int main(int argc, char * argv[]) {
     init_sequence();
     print_status();
 
-    FILE *fp;
+    FILE *fp, *of;
     fp = fopen("./defs/example.csv", "r");
+    of = fopen("./output/example.dat", "w");
 
     while (load_def(fp)) {
-        run();
+        run(of);
     }
 
-
     fclose(fp);
+    fclose(of);
     halt_sequence();
-    print_status();
     e_close(&dev);
     e_free(&emem_req);
     e_free(&emem_def);
