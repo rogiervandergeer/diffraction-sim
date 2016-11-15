@@ -9,7 +9,7 @@ unsigned rows, cols, i, j, ncores, row, col;
 
 e_platform_t platform;
 e_epiphany_t dev;
-e_mem_t emem;
+e_mem_t emem_req;
 e_mem_t emem_def;
 
 Request req;
@@ -139,7 +139,7 @@ void calc(const PlateDef* pd) {
 
 void push_request() {
     // Write a request
-    e_write(&emem, 0, 0, 0, &req, sizeof(Request));
+    e_write(&emem_req, 0, 0, 0, &req, sizeof(Request));
 }
 
 void push_definition() {
@@ -163,12 +163,16 @@ int load_def(FILE* fp) {
         &def.sensor.dimension, &def.sensor.diameter,
         &def.sensor.position.x, &def.sensor.position.y, &def.sensor.position.z,
         &def.wavelength);
+    if (vals <= 0) return 0;
     set_status(H_CALC);
     pd.inner_radius = 0;
     pd.outer_radius = 0.05;
     calc(&pd);
     push_definition();
+    return 0;
 }
+
+void run() { }
 
 int main(int argc, char * argv[]) {
 
@@ -178,12 +182,15 @@ int main(int argc, char * argv[]) {
     cols = platform.cols;
     ncores = rows * cols;
 
-    e_alloc(&emem, OFFSET_SHA, sizeof(Request));
-    e_alloc(&emem_def, 0x01800000, sizeof(Definition));
+    e_alloc(&emem_req, OFFSET_SHA_H, sizeof(Request));
+    e_alloc(&emem_def, OFFSET_SHA_H+sizeof(Request), sizeof(Definition));
 
     FILE *fp;
     fp = fopen("./defs/example.csv", "r");
-    load_def(fp);
+
+    while (load_def(fp)) {
+        run();
+    }
 
     init_workgroup(&dev);
     init();
@@ -209,12 +216,11 @@ int main(int argc, char * argv[]) {
         sleep(2);
     }
 
-    e_read(&emem_def, 0, 0, 0, &def, sizeof(Definition));
 
-    fprintf(stdout, "trans %i\n", def.transparency[7]);
     fclose(fp);
     print_status();
     e_close(&dev);
-    e_free(&emem);
+    e_free(&emem_req);
+    e_free(&emem_def);
     return 0;
 }

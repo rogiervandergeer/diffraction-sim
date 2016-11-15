@@ -45,7 +45,7 @@ void process(Block* result) {
         result->data[i].y = 0.;
     }
     result->block_id = -1;
-    Definition* volatile def = (Definition*) (0x8f000000+sizeof(Request));
+    Definition* volatile def = (Definition*) (OFFSET_SHA_C+sizeof(Request));
 
     laser.x = 0;
     laser.y = 0;
@@ -85,7 +85,7 @@ void process(Block* result) {
 }
 
 int main(void) {
-    Request* volatile r = (Request*) (0x8f000000);
+    Request* volatile r = (Request*) (OFFSET_SHA_C);
     int* state = (int*) OFFSET_STT;
     Block* data = (Block*) OFFSET_BLK;
     *state = S_INIT;
@@ -98,7 +98,5 @@ int main(void) {
         process(data);
         *state = S_WAITING;
     }
-    Definition* def = (Definition*) (0x8f800000);
-    req->block_id = 42 + (int)(255*def->transparency[7]);
     *state = S_DONE;
 }

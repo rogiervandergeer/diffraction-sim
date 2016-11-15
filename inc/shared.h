@@ -8,7 +8,9 @@
 #define OFFSET_STT 0x6000
 #define OFFSET_REQ 0x6500
 #define OFFSET_BLK 0x7000
-#define OFFSET_SHA 0x01000000
+
+#define OFFSET_SHA_H 0x01000000
+#define OFFSET_SHA_C 0x8f000000
 
 #define S_INIT 0
 #define S_WAITING 1
@@ -37,7 +39,7 @@ typedef struct __attribute__((aligned(8))) {
     Vector position;
 } Raster;
 
-typedef struct __attribute__((aligned(8))) {
+typedef struct __attribute__((aligned(8), packed)) {
     uint32_t status;
     int32_t block_id;
     int32_t col_id[N_CORES];
