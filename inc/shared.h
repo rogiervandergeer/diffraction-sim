@@ -1,9 +1,9 @@
 #include <stdint.h>
 
-#define BLOCK_SIZE 10
-#define PLATE_SIZE 25
+#define BLOCK_SIZE 64
+#define PLATE_SIZE 2750
 #define BUFOFFSET (0x01000000)
-#define N_CORES 5
+#define N_CORES 16
 
 #define OFFSET_STT 0x6000
 #define OFFSET_REQ 0x6500
