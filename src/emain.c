@@ -7,96 +7,140 @@
 
 #include "shared.h"
 
-OldReq* req = (OldReq*) OFFSET_REQ;
+int* state;
+Request* volatile req;
+Result* res;
+int core_id;
+
+void calc_core_id(void) {
+    // Calculate the core number;
+    unsigned core_row = e_group_config.core_row;
+    unsigned core_col = e_group_config.core_col;
+    unsigned group_rows = e_group_config.group_rows;
+    unsigned group_cols = e_group_config.group_cols;
+    core_id = core_row * group_cols + core_col;
+}
+
+
+int get_order(void) {
+    return req->order[core_id];
+}
+
+void set_state(const int status) {
+    *state = status;
+}
+
 double d1, d2;
 int i, j, q;
 Vector laser, plate, sensor;
 
 double middle, strut_radius, strut_angle, rsq, ang;
 
-double calc_strut_position(const int i) {
-    return 2*i*M_PI/req->platedef_struts - M_PI + req->platedef_strutangle;
-}
-
 double transparency(const Definition* d,
-                    const unsigned i,
-                    const unsigned j) {
+        const unsigned i,
+        const unsigned j) {
     int val = (int)d->transparency[i*PLATE_SIZE+j];
     return (float)val/255.;
 }
 
 
-float dim(const double delta, const unsigned n, const unsigned i) {
+double dim(const double delta, const unsigned n, const unsigned i) {
     return i*delta-(0.5*delta*(n-1));
 }
 
 double distance(const Vector* a, const Vector* b) {
     return sqrt(
-        (a->x - b->x)*(a->x - b->x) +
-        (a->y - b->y)*(a->y - b->y) +
-        (a->z - b->z)*(a->z - b->z)
-    )/req->wavelength;
+            (a->x - b->x)*(a->x - b->x) +
+            (a->y - b->y)*(a->y - b->y) +
+            (a->z - b->z)*(a->z - b->z)
+            );
 }
 
-void process(Block* result) { 
-    e_wait(0, 10000000);
+void clear_result(void) {
     for (i=0; i<BLOCK_SIZE; ++i) {
-        result->data[i].x = 0.;
-        result->data[i].y = 0.;
+        res->data[i].x = 0.;
+        res->data[i].y = 0.;
     }
-    result->block_id = -1;
-    Definition* volatile def = (Definition*) (OFFSET_SHA_C+sizeof(Request));
+    res->block_id = -1;
+}
 
+void process() { 
+    set_state(S_RUN);
+    clear_result();
+
+    Definition* def = (Definition*) (OFFSET_SHA_C+sizeof(Request));
+
+    // Laser
     laser.x = 0;
     laser.y = 0;
     laser.z = 0;
-    double plate_delta = req->plate_diameter / req->plate_dimension;
-    plate.x = req->plate_x;
-    plate.y = req->plate_y;
-    plate.z = req->plate_z;
-    double sensor_delta = req->sensor_diameter / req->sensor_dimension;
-    sensor.x = req->sensor_x;
-    sensor.y = req->sensor_y + 
-        dim(sensor_delta, req->sensor_dimension, req->row_id);
-    sensor.z = req->sensor_z;;
 
-    for (i=0; i<req->plate_dimension; ++i) {
-        for (j=0; j<req->plate_dimension; ++j) {
-            plate.x = req->plate_x + 
-                dim(plate_delta, req->plate_dimension, i);
-            plate.y = req->plate_y +
-                dim(plate_delta, req->plate_dimension, j);
+    // Plate
+    double plate_delta = def->plate.diameter / def->plate.dimension;
+    plate.x = def->plate.position.x;
+    plate.y = def->plate.position.y;
+    plate.z = def->plate.position.z;
+
+    // Sensor
+    double sensor_delta = def->sensor.diameter / def->sensor.dimension;
+    sensor.x = def->sensor.position.x;
+    sensor.y = def->sensor.position.y
+        + dim(sensor_delta, def->sensor.dimension, req->row_id[core_id]);
+    sensor.z = def->sensor.position.z;
+
+
+    int q_start = req->col_id[core_id] * BLOCK_SIZE;
+    int q_end = q_start + req->pixels[core_id];
+
+    for (i=0; i<def->plate.dimension; ++i) {
+        plate.x = def->plate.position.x
+            + dim(plate_delta, def->plate.dimension, i);
+        for (j=0; j<def->plate.dimension; ++j) {
+            plate.y = def->plate.position.y
+                + dim(plate_delta, def->plate.dimension, j);
             double t = transparency(def, i, j);
             if (t > 0) {
                 d1 = distance(&laser, &plate);                
-                for (q=0; q<req->sensor_dimension; ++q) {
-                    sensor.x = dim(sensor_delta, req->sensor_dimension, q);
+                for (q=q_start; q<q_end; ++q) {
+                    sensor.x = def->sensor.position.x
+                        + dim(sensor_delta, def->sensor.dimension, q);
                     d2 = distance(&plate, &sensor);
-                    result->data[q].x += sin(d1+d2);
-                    result->data[q].y += cos(d1+d2);
+                    double w = (d1+d2)/def->wavelength;
+                    res->data[q].x += sin(w);
+                    res->data[q].y += cos(w);
                 }
             }
         }
     }
+    res->block_id = req->block_id;
 
-    result->block_id = req->block_id;
+    set_state(S_DONE);
+    while (get_order() == O_RUN) e_wait(0, 1000);
+
+
+    set_state(S_WAIT);
     req->block_id = 0;
     return;
 }
 
+
 int main(void) {
-    Request* volatile r = (Request*) (OFFSET_SHA_C);
-    int* state = (int*) OFFSET_STT;
-    Block* data = (Block*) OFFSET_BLK;
-    *state = S_INIT;
-    while (req->block_id != 0) { }
-    *state = S_WAITING;
-    while (1) {
-        while (req->block_id == 0) { }
-        if (req->block_id < 0) break;
-        *state = S_RUNNING;
-        process(data);
-        *state = S_WAITING;
+    state = (int*) OFFSET_STT;
+    req = (Request* volatile) OFFSET_SHA_C;
+    res = (Result*) OFFSET_RES;
+    calc_core_id();
+
+    set_state(S_INIT);
+    while (get_order() != O_INIT) e_wait(0, 1000);
+    while (get_order() == O_INIT) e_wait(0, 1000);
+    set_state(S_WAIT);
+
+    while (get_order() != O_HALT) {
+        if (get_order() == O_WAIT) {
+            e_wait(0, 10000);
+        } else if (get_order() == O_RUN) {
+            process();
+        } 
     }
-    *state = S_DONE;
+    set_state(S_HALT);
 }
