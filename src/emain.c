@@ -91,6 +91,7 @@ void process() {
 
     int q_start = req->col_id[core_id] * BLOCK_SIZE;
     int q_end = q_start + req->pixels[core_id];
+    double wl = 1./(def->wavelength);
 
     for (i=0; i<def->plate.dimension; ++i) {
         plate.x = def->plate.position.x
@@ -105,7 +106,7 @@ void process() {
                     sensor.x = def->sensor.position.x
                         + dim(sensor_delta, def->sensor.dimension, q);
                     d2 = distance(&plate, &sensor);
-                    double w = (d1+d2)/def->wavelength;
+                    double w = (d1+d2)*wl;
                     res->data[q-q_start].x += sin(w);
                     res->data[q-q_start].y += cos(w);
                 }
