@@ -8,9 +8,12 @@ EINCS="-I ${ESDK}/tools/host/include"
 ELDF="-T ${ESDK}/bsps/current/internal.ldf"
 INC="-I inc/"
 
-# Create binary dir
+# Create binary and output dir
 if [ ! -d bin ]; then
   mkdir -p bin
+fi
+if [ ! -d output ]; then
+  mkdir -p output
 fi
 
 # Build host app
