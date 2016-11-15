@@ -214,12 +214,29 @@ void run(FILE* of) {
             }
         }
         if ((n_running == 0) && (col_id >= n_cols)) break;
-        usleep(10);
+        usleep(100);
     }
     fprintf(stdout, "Done.\n");
 }
 
 int main(int argc, char * argv[]) {
+
+    // Handle arguments and open files
+    if (argc != 3) {
+        printf("Usage: %s <definition> <output>\n", argv[0]);
+        return 1;
+    }
+    FILE *input_file, *output_file;
+    input_file = fopen(argv[1], "r");
+    if (!input_file) {
+        printf("Unable to open '%s' for reading.\n", argv[1]);
+        return 2;
+    }
+    output_file = fopen(argv[2], "w");
+    if (!output_file) {
+        printf("Unable to open '%s' for writing.\n", argv[2]);
+        return 2;
+    }
 
     init_epiphany(&platform);
 
@@ -233,16 +250,12 @@ int main(int argc, char * argv[]) {
     init_workgroup(&dev);
     init_sequence();
 
-    FILE *fp, *of;
-    fp = fopen("./defs/large.csv", "r");
-    of = fopen("./output/large.dat", "w");
-
-    while (load_def(fp)) {
-        run(of);
+    while (load_def(input_file)) {
+        run(output_file);
     }
 
-    fclose(fp);
-    fclose(of);
+    fclose(input_file);
+    fclose(output_file);
     halt_sequence();
     e_close(&dev);
     e_free(&emem_req);
