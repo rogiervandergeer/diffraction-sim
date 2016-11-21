@@ -143,7 +143,7 @@ void calc(const PlateDef* pd) {
             } else{
                 t = 1;
             }
-            //        fprintf(stdout, "x, y, t = %f, %f, %i (rsq=%f)\n", x, y, t, rsq); 
+                    fprintf(stdout, "x, y, t = %f, %f, %i (rsq=%f)\n", x, y, t, rsq); 
             def.transparency[i*PLATE_SIZE+j] = (char) t;
         }
     }
@@ -154,16 +154,15 @@ void calc(const PlateDef* pd) {
 int load_def(FILE* fp) {
     PlateDef pd;
     int vals = fscanf(fp,
-            "%i, %i, %lf, %lf, %lf, %lf, %i, %lf, %lf, %lf, %lf, %lf",
+            "%i, %i, %lf, %lf, %lf, %lf, %i, %lf, %lf, %lf, %lf, %lf, %lf, %lf",
             &req.block_id,
             &def.plate.dimension, &def.plate.diameter,
             &def.plate.position.x, &def.plate.position.y, &def.plate.position.z,
             &def.sensor.dimension, &def.sensor.diameter,
             &def.sensor.position.x, &def.sensor.position.y, &def.sensor.position.z,
-            &def.wavelength);
+            &def.wavelength,
+            &pd.inner_radius, &pd.outer_radius);
     if (vals <= 0) return 0;
-    pd.inner_radius = 0;
-    pd.outer_radius = 0.05;
     calc(&pd);
     push_definition();
     return 1;
