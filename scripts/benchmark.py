@@ -31,7 +31,7 @@ def main():
                 timings.append(score/(n*math.pi*0.25))
             print("%s: %.4g, %.4g, %.4g" % 
                     (opt, timings[0], timings[1], timings[2]))
-            bf.write("%s: %.4g, %.4g, %.4g" % 
+            bf.write("%s: %.4g, %.4g, %.4g\n" % 
                     (opt, timings[0], timings[1], timings[2]))
 
 main()
