@@ -47,17 +47,17 @@ def main():
     read()
     print('\nCurrent result:')
     with open('benchmark.txt', 'w') as bf:
-        for opt in range(4):
-            build(opt)
+        for bm in range(3):
             timings = [ ]
-            for bm in range(3):
+            for opt in range(4):
+                build(opt)
                 score = benchmark(bm)
                 n = 10240000 if bm > 0 else 640000 
                 timings.append(score/(n*math.pi*0.25))
-            print("%s: %.4e, %.4e, %.4e" % 
-                    (opt, timings[0], timings[1], timings[2]))
-            bf.write("%s: %.4e, %.4e, %.4e\n" % 
-                    (opt, timings[0], timings[1], timings[2]))
+            print("%s: %.4e, %.4e, %.4e, %.4e" % 
+                    (bm, timings[0], timings[1], timings[2], timings[3]))
+            bf.write("%s: %.4e, %.4e, %.4e, %.4e\n" % 
+                    (bm, timings[0], timings[1], timings[2], timings[3]))
 
 main()
 
