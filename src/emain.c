@@ -35,8 +35,6 @@ float dc, t;
 int i, j, q;
 Vector laser, plate, sensor;
 
-double middle, strut_radius, strut_angle, rsq, ang;
-
 float transparency(const Definition* d,
         const unsigned i,
         const unsigned j) {
