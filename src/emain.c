@@ -31,13 +31,13 @@ void set_state(const int status) {
 }
 
 double d1, d2;
-float dc;
+float dc, t;
 int i, j, q;
 Vector laser, plate, sensor;
 
 double middle, strut_radius, strut_angle, rsq, ang;
 
-double transparency(const Definition* d,
+float transparency(const Definition* d,
         const unsigned i,
         const unsigned j) {
     int val = (int)d->transparency[i*PLATE_SIZE+j];
@@ -101,7 +101,7 @@ void process() {
         for (j=0; j<def->plate.dimension; ++j) {
             plate.y = def->plate.position.y
                 + dim(plate_delta, def->plate.dimension, j);
-            double t = transparency(def, i, j);
+            t = transparency(def, i, j);
             if (t > 0) {
                 d1 = distance_mod(&laser, &plate, wl);
                 for (q=q_start; q<q_end; ++q) {
@@ -109,12 +109,10 @@ void process() {
                         + dim(sensor_delta, def->sensor.dimension, q);
                     d2 = distance_mod(&plate, &sensor, wl);
                     dc = (float)(d1+d2);
-//                    float dx = (float)dc;
-//                    double sx = (double) sinf(dx);
                     float sx, cx;
                     sincosf(dc, &sx, &cx);
-                    res->data[q-q_start].x += sx;
-                    res->data[q-q_start].y += cx;
+                    res->data[q-q_start].x += sx*t;
+                    res->data[q-q_start].y += cx*t;
                 }
             }
         }

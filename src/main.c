@@ -141,7 +141,7 @@ void calc(const PlateDef* pd) {
             } else if (rsq > pd->outer_radius * pd->outer_radius) {
                 t = 0;
             } else{
-                t = 1;
+                t = 255;
             }
                     fprintf(stdout, "x, y, t = %f, %f, %i (rsq=%f)\n", x, y, t, rsq); 
             def.transparency[i*PLATE_SIZE+j] = (char) t;
