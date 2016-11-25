@@ -30,8 +30,8 @@ typedef struct __attribute__((aligned(8))) {
 } Vector;
 
 typedef struct __attribute__((aligned(8))) {
-    double x;
-    double y;
+    float x;
+    float y;
 } Field;
 
 typedef struct __attribute__((aligned(8))) {

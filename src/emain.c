@@ -113,8 +113,8 @@ void process() {
 //                    double sx = (double) sinf(dx);
                     float sx, cx;
                     sincosf(dc, &sx, &cx);
-                    res->data[q-q_start].x += (double)sx;
-                    res->data[q-q_start].y += (double)cx;
+                    res->data[q-q_start].x += sx;
+                    res->data[q-q_start].y += cx;
                 }
             }
         }

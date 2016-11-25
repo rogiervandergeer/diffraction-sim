@@ -119,7 +119,7 @@ void read(const int core_id, FILE* of) {
             core_id, n_pixels(req.col_id[core_id]));
     int pixel;
     for (pixel=0; pixel<n_pixels(req.col_id[core_id]); ++pixel) {
-        fprintf(of, "%i, %i, %i, %lf, %lf\n", 
+        fprintf(of, "%i, %i, %i, %f, %f\n", 
                 req.block_id, req.col_id[core_id]*BLOCK_SIZE+pixel, 
                 req.row_id[core_id],
                 result.data[pixel].x, result.data[pixel].y);
