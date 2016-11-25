@@ -30,7 +30,8 @@ void set_state(const int status) {
     *state = status;
 }
 
-double d1, d2, dc;
+double d1, d2;
+float dc;
 int i, j, q;
 Vector laser, plate, sensor;
 
@@ -107,9 +108,13 @@ void process() {
                     sensor.x = def->sensor.position.x
                         + dim(sensor_delta, def->sensor.dimension, q);
                     d2 = distance_mod(&plate, &sensor, wl);
-                    dc = d1+d2;
-                    res->data[q-q_start].x += sin(dc);
-                    res->data[q-q_start].y += cos(dc);
+                    dc = (float)(d1+d2);
+//                    float dx = (float)dc;
+//                    double sx = (double) sinf(dx);
+                    float sx, cx;
+                    sincosf(dc, &sx, &cx);
+                    res->data[q-q_start].x += (double)sx;
+                    res->data[q-q_start].y += (double)cx;
                 }
             }
         }
