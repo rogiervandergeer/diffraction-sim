@@ -30,7 +30,7 @@ void set_state(const int status) {
     *state = status;
 }
 
-double d1, d2;
+double d1, d2, dc;
 int i, j, q;
 Vector laser, plate, sensor;
 
@@ -48,12 +48,13 @@ double dim(const double delta, const unsigned n, const unsigned i) {
     return i*delta-(0.5*delta*(n-1));
 }
 
-double distance(const Vector* a, const Vector* b) {
-    return sqrt(
+double distance_mod(const Vector* a, const Vector* b, const double inv_wl) {
+    return fmod(
+        sqrt(
             (a->x - b->x)*(a->x - b->x) +
             (a->y - b->y)*(a->y - b->y) +
             (a->z - b->z)*(a->z - b->z)
-            );
+        )*inv_wl, 2*M_PI);
 }
 
 void clear_result(void) {
@@ -101,14 +102,14 @@ void process() {
                 + dim(plate_delta, def->plate.dimension, j);
             double t = transparency(def, i, j);
             if (t > 0) {
-                d1 = distance(&laser, &plate);                
+                d1 = distance_mod(&laser, &plate, wl);
                 for (q=q_start; q<q_end; ++q) {
                     sensor.x = def->sensor.position.x
                         + dim(sensor_delta, def->sensor.dimension, q);
-                    d2 = distance(&plate, &sensor);
-                    double w = (d1+d2)*wl;
-                    res->data[q-q_start].x += sin(w);
-                    res->data[q-q_start].y += cos(w);
+                    d2 = distance_mod(&plate, &sensor, wl);
+                    dc = d1+d2;
+                    res->data[q-q_start].x += sin(dc);
+                    res->data[q-q_start].y += cos(dc);
                 }
             }
         }
