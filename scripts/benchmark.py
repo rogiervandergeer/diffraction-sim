@@ -23,10 +23,13 @@ def compare(file_1, file_2):
                       how='inner', suffixes=['_1', '_2'])
     if len(df_1) != len(df_2) or len(df_1) != len(df_m):
         raise Exception('Size and/or index mismatch!')
-    df_m['x'] = abs(df_m['x_1'] - df_m['x_2'])
-    df_m['y'] = abs(df_m['y_1'] - df_m['y_2'])
+    def rela_diff(x, y):
+        return abs((x-y)/(x+y))
+    df_m['x'] = [rela_diff(x, y) for x, y in zip(df_m['x_1'], df_m['x_2'])]
+    df_m['y'] = [rela_diff(x, y) for x, y in zip(df_m['y_1'], df_m['y_2'])]
     changed = df_m[(df_m.x > 1E-3) | (df_m.y > 1E-3)]
     if len(changed) > 0:
+        print(file_1)
         print(changed.head())
         raise Exception('Result does not match!')
 
