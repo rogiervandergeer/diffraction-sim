@@ -6,7 +6,7 @@ ESDK=${EPIPHANY_HOME}
 ELIBS="-L ${ESDK}/tools/host/lib"
 EINCS="-I ${ESDK}/tools/host/include"
 ELDF="-T ${ESDK}/bsps/current/internal.ldf"
-INC="-I inc/"
+INC="-I include/"
 
 # Create binary and output dir
 if [ ! -d bin ]; then
