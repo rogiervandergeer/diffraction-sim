@@ -29,6 +29,8 @@ class ClicPlate(Plate):
             raise ValueError('cannot have negative struts')
         if self.strut_width * self.n_struts >= 2*pi:
             raise ValueError('too many or too large struts')
+        if self.tool_size + self.delta > self.gap:
+            raise ValueError('Tool size too large.')
 
     def opacity(self, x, y):
         d = 2*sqrt(x*x + y*y)
@@ -43,6 +45,10 @@ class ClicPlate(Plate):
             if d_ang <= 0.5 * self.strut_width:
                 return 0
         return retval
+
+    @property
+    def gap(self):
+        return 0.5 * (self.outer_diameter - self.inner_diameter)
 
     @property
     def strut_angles(self):
