@@ -34,6 +34,8 @@ def tooled(plate, tool_diameter):
             for y in range(plate.shape[1]):
                 if check_circle(plate, (x, y), tool_diameter*0.5, value):
                     fill_circle(retval, (x, y), tool_diameter*0.5, value)
+    if len(nonzero_unique(retval)) == 0:
+        raise ValueError('tooled plate is non-transparent')
     return retval
 
 

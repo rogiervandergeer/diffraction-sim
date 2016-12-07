@@ -20,7 +20,14 @@ class ClicPlate(Plate):
         super().__init__(diameter, dimension)
 
     def check(self):
-        pass
+        if self.outer_diameter > self.diameter:
+            raise ValueError('outer diameter of plate too large')
+        if self.outer_diameter <= self.inner_diameter:
+            raise ValueError('outer diameter must be > inner diameter')
+        if self.n_struts < 0:
+            raise ValueError('cannot have negative struts')
+        if self.strut_width * self.n_struts >= 2*pi:
+            raise ValueError('too many or too large struts')
 
     def opacity(self, x, y):
         d = 2*sqrt(x*x + y*y)
@@ -41,6 +48,6 @@ class ClicPlate(Plate):
         if self.n_struts == 0:
             return []
         return [
-            self.rotation + (2*pi*idx)/self.n_struts
+            self.rotation % (2*pi/self.n_struts) + (2*pi*idx)/self.n_struts
             for idx in range(self.n_struts+1)
         ]
