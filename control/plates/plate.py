@@ -1,20 +1,25 @@
 import numpy as np
 from math import sqrt
 from matplotlib.pyplot import imshow, figure
+from control.plates.tooling import tooled
 
 
 class Plate:
 
-    def __init__(self, diameter, dimension):
+    def __init__(self, diameter, dimension, tool_size=None):
         self.diameter = diameter
         self.dimension = dimension
+        self.tool_size = tool_size
         self.check()
 
     def build(self):
-        return np.array([
+        raw = np.array([
             [self.calc(row, col) for col in range(self.dimension)]
             for row in range(self.dimension)
         ], dtype=np.uint8)
+        if not self.tool_size:
+            return raw
+        return tooled(raw, self.tool_size/self.delta)
 
     def calc(self, row, col):
         return self.opacity(x=self.position(col), y=self.position(row))

@@ -7,6 +7,7 @@ class ClicPlate(Plate):
     def __init__(self,
                  diameter,
                  dimension,
+                 tool_size,
                  inner_diameter,
                  outer_diameter,
                  n_struts,
@@ -17,7 +18,7 @@ class ClicPlate(Plate):
         self.n_struts = n_struts
         self.strut_width = strut_width
         self.rotation = rotation
-        super().__init__(diameter, dimension)
+        super().__init__(diameter, dimension, tool_size)
 
     def check(self):
         if self.outer_diameter > self.diameter:

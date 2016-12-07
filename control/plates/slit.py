@@ -3,12 +3,13 @@ from control.plates import Plate
 
 class SlitPlate(Plate):
 
-    def __init__(self, diameter, dimension, n_slits, width, height, distance):
+    def __init__(self, diameter, dimension, tool_size,
+                 n_slits, width, height, distance):
         self.n_slits = n_slits
         self.width = width
         self.height = height
         self.distance = distance
-        super().__init__(diameter, dimension)
+        super().__init__(diameter, dimension, tool_size)
 
     def check(self):
         if self.n_slits < 1:
