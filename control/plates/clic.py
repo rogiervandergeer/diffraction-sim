@@ -10,8 +10,8 @@ class ClicPlate(Plate):
                  tool_size,
                  inner_diameter,
                  outer_diameter,
-                 n_struts,
-                 strut_width,
+                 n_struts=0,
+                 strut_width=0.1,
                  rotation=0.0):
         self.inner_diameter = inner_diameter
         self.outer_diameter = outer_diameter

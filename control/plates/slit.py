@@ -16,7 +16,7 @@ class SlitPlate(Plate):
             raise ValueError('must have at least one slit')
         if self.width < 0 or self.height < 0:
             raise ValueError('all dimensions must be positive')
-        if self.distance < self.width:
+        if self.distance < self.width and self.n_slits > 1:
             raise ValueError('slits overlap')
         if self.n_slits * self.distance + self.width > self.diameter:
             raise ValueError('slits do not fit')
