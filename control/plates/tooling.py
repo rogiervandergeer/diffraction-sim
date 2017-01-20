@@ -3,8 +3,7 @@ from numpy import array
 
 
 def tooled(plate, tool_diameter):
-    """
-    Create a copy of plate that can be created with a circular tool.
+    """Create a copy of plate that can be created with a circular tool.
 
     When a physical plate is to be created with a circular tool, i.e. a drill,
     it cannot contain straight angles. This function creates a plate similar
@@ -40,8 +39,7 @@ def tooled(plate, tool_diameter):
 
 
 def check_circle(plate, offset, radius, value):
-    """
-    Check if all values in a circle on the plate are at least a given value.
+    """Check if all values in a circle on the plate are at least a given value.
 
     Args:
         plate (2d array): Plate to check the entries of.
@@ -59,8 +57,7 @@ def check_circle(plate, offset, radius, value):
 
 
 def fill_circle(plate, offset, radius, value):
-    """
-    Fill a circle of size around offset in the plate with a value.
+    """Fill a circle of size around offset in the plate with a value.
 
     Args:
         plate (2d array): Array to fill the entries in.
@@ -73,8 +70,7 @@ def fill_circle(plate, offset, radius, value):
 
 
 def circle_coordinates(shape, offset, size):
-    """
-    Generate (x, y) coordinates in a circle of a given size.
+    """Generate (x, y) coordinates in a circle of a given size.
 
     Args:
         shape (tuple): Shape of the array we are working on.
@@ -93,8 +89,7 @@ def circle_coordinates(shape, offset, size):
 
 
 def nonzero_unique(plate):
-    """
-    Find all nonzero unique values in a 2d array.
+    """Find all nonzero unique values in a 2d array.
 
     Args:
         plate (2d iterable): Array to find the unique values of.
