@@ -12,6 +12,31 @@ class Plate:
         self.tool_size = tool_size
         self.check()
 
+    @classmethod
+    def create(cls, definition):
+        """
+        Create a plate according to a definition.
+
+        Args:
+            definition (dict): Dictionary containing a key 'type' of which the
+                value matches the name of one of the plate subclasses, and keys
+                for all arguments required by that plate.
+
+        Returns:
+            Plate: an instance of one of the sub-types of Plate
+        """
+        sub_cls = cls.select(definition['type'])
+        return sub_cls(
+            **{key: val for key, val in definition.items()  if key != 'type'}
+        )
+
+    @classmethod
+    def select(cls, name):
+        for sub_cls in cls.__subclasses__():
+            if name == sub_cls.__name__:
+                return sub_cls
+        raise ValueError('No such plate class:', name)
+
     def build(self):
         raw = np.array([
             [self.calc(row, col) for col in range(self.dimension)]
