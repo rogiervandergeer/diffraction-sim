@@ -127,25 +127,32 @@ void read(const int core_id, FILE* of) {
 }
 
 
-void calc(const PlateDef* pd) {
-    int i, j, t;
-    double x, y, rsq;
-    // TODO: check max dimension
-    for (i=0; i<def.plate.dimension; ++i) {
-        x = loc(def.plate.diameter, def.plate.dimension, i);
-        for (j=0; j<def.plate.dimension; ++j) {
-            y = loc(def.plate.diameter, def.plate.dimension, j);
-            rsq = x*x + y*y;
-            if (rsq < pd->inner_radius * pd->inner_radius) {
-                t = 0;
-            } else if (rsq > pd->outer_radius * pd->outer_radius) {
-                t = 0;
-            } else{
-                t = 255;
+int read_plate(const PlateDef* pd) {
+    // Read in a plate from a plate CSV.
+    FILE *fp = fopen(pd->filename, "r");
+    char buffer[1024] ;
+    char *record, *line;
+    int i=0, j=0;
+    if (fp == NULL) {
+        printf("Unable to read plate definition file \"%s\".\n", pd->filename);
+        return 0;
+    } else {
+        printf("Reading plate definition file.\n");
+        while ((line=fgets(buffer, sizeof(buffer), fp)) != NULL) {
+            j = 0;
+            record = (char*)strtok(line, ";");
+            while (record != NULL) {
+                // TODO: check max 255.
+                // TODO: check plate dimension.
+                def.transparency[i*PLATE_SIZE+j++] = (char)atoi(record); 
+                // printf("Writing %i to (%i, %i).\n", atoi(record), i, j);
+                record = (char*)strtok(NULL,";");
             }
-                    fprintf(stdout, "x, y, t = %f, %f, %i (rsq=%f)\n", x, y, t, rsq); 
-            def.transparency[i*PLATE_SIZE+j] = (char) t;
+            ++i;
+            // TODO: check plate dimension.
         }
+        fclose(fp);
+        return 1;
     }
 }
 
@@ -153,19 +160,22 @@ void calc(const PlateDef* pd) {
 
 int load_def(FILE* fp) {
     PlateDef pd;
+    printf("Reading definition line\n");
     int vals = fscanf(fp,
-            "%i, %i, %lf, %lf, %lf, %lf, %i, %lf, %lf, %lf, %lf, %lf, %lf, %lf",
+            "%i, %i, %lf, %lf, %lf, %lf, %i, %lf, %lf, %lf, %lf, %lf, %s",
             &req.block_id,
             &def.plate.dimension, &def.plate.diameter,
             &def.plate.position.x, &def.plate.position.y, &def.plate.position.z,
             &def.sensor.dimension, &def.sensor.diameter,
             &def.sensor.position.x, &def.sensor.position.y, &def.sensor.position.z,
-            &def.wavelength,
-            &pd.inner_radius, &pd.outer_radius);
+            &def.wavelength, pd.filename);
     if (vals <= 0) return 0;
-    calc(&pd);
-    push_definition();
-    return 1;
+    printf("Reading plate, %s\n", pd.filename);
+    if (read_plate(&pd)) {
+        push_definition();
+        return 1;
+    }
+    return 0;
 }
 
 void assign(const unsigned core_id,
@@ -219,6 +229,7 @@ void run(FILE* of) {
 }
 
 int main(int argc, char * argv[]) {
+    printf("Starting\n");
 
     // Handle arguments and open files
     if (argc != 3) {
