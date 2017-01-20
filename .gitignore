@@ -2,3 +2,6 @@ bin
 output
 venv
 *.swp
+.cache
+.idea
+__pycache__
