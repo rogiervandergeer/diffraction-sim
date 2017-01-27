@@ -12,13 +12,13 @@ def main(*argv):
     parser.add_argument('-s', '--source', required=True,
                         help='Source definition JSON file.')
     parser.add_argument('-d', '--definitions', default='definitions/',
-                        help='Output definition directory.')
+                        help='Output definition directory. Defaults to "definitions/".')
     parser.add_argument('-p', '--plates', default='plates/',
-                        help='Output plate directory.')
+                        help='Output plate directory. Defaults to "plates/".')
     args = parser.parse_args(argv[1:])
     create_folders()
-    create_plates(args.source,
-                  source_directory=args.source,
+    create_plates(source_file=args.source,
+                  definition_directory=args.definitions,
                   plate_directory=args.plates,
                   verbose=args.verbose)
 

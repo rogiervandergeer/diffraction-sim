@@ -4,14 +4,14 @@ from numpy import savetxt
 from os.path import join, basename
 
 
-def create_plates(definition_file,
-                  source_directory='definitions/',
+def create_plates(source_file,
+                  definition_directory='definitions/',
                   plate_directory='plates/',
                   verbose=False):
-    name = basename(definition_file)[:-5] \
-        if definition_file.endswith('.json') \
-        else basename(definition_file)
-    definitions = read_definitions(definition_file)
+    name = basename(source_file)[:-5] \
+        if source_file.endswith('.json') \
+        else basename(source_file)
+    definitions = read_definitions(source_file)
     for definition in definitions:
         filename = join(
             plate_directory,
@@ -19,7 +19,7 @@ def create_plates(definition_file,
         )
         definition.write_plate(filename)
     write_source(
-        filename=join(source_directory, '{name}.csv'.format(name=name)),
+        filename=join(definition_directory, '{name}.csv'.format(name=name)),
         definitions=definitions,
         verbose=verbose
     )
