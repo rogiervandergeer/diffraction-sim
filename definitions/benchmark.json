@@ -1,0 +1,59 @@
+[
+  {
+    "id": 0,
+    "plate": {
+      "dimension": 50,
+      "diameter": 0.1,
+      "position": [0, 0, 50],
+      "definition": {
+        "type": "BandPlate",
+        "inner_diameter": 0,
+        "outer_diameter": 0.1
+      }
+    },
+    "sensor": {
+      "dimension": 16,
+      "diameter": 0.005,
+      "position": [0, 0, 100]
+    },
+    "wavelength": 633E-9
+  },
+  {
+    "id": 1,
+    "plate": {
+      "dimension": 50,
+      "diameter": 0.1,
+      "position": [0, 0, 50],
+      "definition": {
+        "type": "BandPlate",
+        "inner_diameter": 0,
+        "outer_diameter": 0.05
+      },
+      "sensor": {
+        "dimension": 64,
+        "diameter": 0.005,
+        "position": [0, 0, 100]
+      },
+      "wavelength": 633E-9
+    }
+  },
+  {
+    "id": 2,
+    "plate": {
+      "dimension": 200,
+      "diameter": 0.1,
+      "position": [0, 0, 50],
+      "definition": {
+        "type": "BandPlate",
+        "inner_diameter": 0,
+        "outer_diameter": 0.05
+      },
+      "sensor": {
+        "dimension": 16,
+        "diameter": 0.005,
+        "position": [0, 0, 100]
+      },
+      "wavelength": 633E-9
+    }
+  }
+]
