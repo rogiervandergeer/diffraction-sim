@@ -1,4 +1,4 @@
-from numpy import array, uint8, float_, complex_, zeros
+from numpy import array, float_, zeros
 from pandas import DataFrame, read_csv
 
 COLUMNS = ['block_id', 'col_id', 'row_id', 'value']
@@ -46,6 +46,27 @@ class Image:
                              in (('rows', self.rows), ('columns', self.columns), ('block_id', self.block_id))
                              if val is not None])
         )
+
+    def compare(self, other):
+        """Calculate the difference per pixel between this Image and another.
+
+        The metric returned is the average absolute difference for each
+        individual pixel between the two images.
+
+        Args:
+            other (Image): The image to compare with. It is required to have
+                the same dimensions as this Image.
+
+        Returns:
+            float
+        """
+        if self.shape != other.shape:
+            raise ValueError('Cannot compare images of different size.')
+        return sum(
+            abs(self.data[row, col] - other.data[row, col])
+            for col in range(self.columns)
+            for row in range(self.rows)
+        ) / (self.columns * self.rows)
 
     @classmethod
     def from_df(cls, df, block_id=None):
