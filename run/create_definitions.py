@@ -86,7 +86,7 @@ def write_plate(data, filename, verbose=False):
     # Write the output
     if verbose:
         print('Writing plate to "{f}".'.format(f=filename))
-    savetxt(filename, result, delimiter=';', fmt='%i')
+    savetxt(filename, result, delimiter=',', fmt='%i')
 
 
 def read_definition(source):

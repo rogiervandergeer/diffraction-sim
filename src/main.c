@@ -140,13 +140,13 @@ int read_plate(const PlateDef* pd) {
         printf("Reading plate definition file.\n");
         while ((line=fgets(buffer, sizeof(buffer), fp)) != NULL) {
             j = 0;
-            record = (char*)strtok(line, ";");
+            record = (char*)strtok(line, ",");
             while (record != NULL) {
                 // TODO: check max 255.
                 // TODO: check plate dimension.
                 def.transparency[i*PLATE_SIZE+j++] = (char)atoi(record); 
                 // printf("Writing %i to (%i, %i).\n", atoi(record), i, j);
-                record = (char*)strtok(NULL,";");
+                record = (char*)strtok(NULL,",");
             }
             ++i;
             // TODO: check plate dimension.

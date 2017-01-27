@@ -39,7 +39,7 @@ def build(optimisation=0):
 def benchmark(benchmark, opt):
     start = datetime.datetime.now()
     check_output(['./bin/main.elf', 
-                  'defs/benchmark{b}.csv'.format(b=benchmark),
+                  'definitions/benchmark{b}.csv'.format(b=benchmark),
                   'output/benchmark{b}.csv'.format(b=benchmark)])
     sec = (datetime.datetime.now()-start).total_seconds()
     compare('reference/benchmark{b}.csv'.format(b=benchmark),
