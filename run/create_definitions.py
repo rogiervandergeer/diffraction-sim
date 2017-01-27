@@ -42,7 +42,7 @@ def write_definition(data, filename, verbose):
                 [d['id'], d['plate']['dimension'], d['plate']['diameter']] +
                 d['plate']['position'] + [d['sensor']['dimension'], d['sensor']['diameter']] +
                 d['sensor']['position'] + [d['wavelength'], d['file']]
-            ))
+            )+'\n')
 
 
 def construct_plate_definition(data):
