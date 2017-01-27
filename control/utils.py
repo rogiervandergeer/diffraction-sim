@@ -16,7 +16,7 @@ def build(optimisation=0):
 
 def create_folders():
     """Create the 'sources', 'plates' and 'output' folders."""
-    for folder in ('sources/', 'plates/', 'output/'):
+    for folder in ('definitions/', 'plates/', 'output/'):
         if not isdir(folder):
             mkdir(folder)
 

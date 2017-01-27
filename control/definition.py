@@ -5,7 +5,7 @@ from os.path import join, basename
 
 
 def create_plates(definition_file,
-                  source_directory='source/',
+                  source_directory='definitions/',
                   plate_directory='plates/',
                   verbose=False):
     name = basename(definition_file)[:-5] \

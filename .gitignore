@@ -1,5 +1,7 @@
 bin
+definitions
 output
+plates
 venv
 *.swp
 .cache
