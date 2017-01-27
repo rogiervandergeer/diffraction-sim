@@ -17,7 +17,7 @@ def create_plates(source_file,
             plate_directory,
             '{name}_{id}.csv'.format(name=name, id=definition.block_id)
         )
-        definition.write_plate(filename)
+        definition.write_plate(filename, verbose=verbose)
     write_source(
         filename=join(definition_directory, '{name}.csv'.format(name=name)),
         definitions=definitions,
@@ -70,7 +70,9 @@ class Definition:
             + [self.data['wavelength'], self.plate_file]
         return ', '.join(str(val) for val in values) + '\n'
 
-    def write_plate(self, filename):
+    def write_plate(self, filename, verbose=False):
         plate = self.plate.build()
+        if verbose:
+            print('Writing plate to "%s".' % filename)
         savetxt(filename, plate, delimiter=',', fmt='%i')
         self.plate_file = filename
