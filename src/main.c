@@ -1,7 +1,8 @@
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <e-hal.h> 
+#include <e-hal.h>
 
 #include "shared.h"
 
@@ -14,6 +15,7 @@ e_mem_t emem_def;
 
 Request req;
 Definition def;
+unsigned start_idx, end_idx;
 
 int n_rows, n_cols;
 
@@ -232,9 +234,20 @@ int main(int argc, char * argv[]) {
     printf("Starting\n");
 
     // Handle arguments and open files
-    if (argc != 3) {
-        printf("Usage: %s <definition> <output>\n", argv[0]);
-        return 1;
+    if (argc == 3) {
+        start_idx = 0;
+        end_idx = INT_MAX;
+    } else if (argc == 4) {
+        start_idx = atoi(argv[4]);
+        end_idx = start_idx;
+    } else if (argc == 5) {
+        start_idx = atoi(argv[4]);
+        end_idx = atoi(argv[5]);
+    } else {
+        printf("Usage:");
+        printf("%s <definition_file> <output_file>\n", argv[0]);
+        printf("%s <definition_file> <output_file> <definition_idx>\n", argv[0]);
+        printf("%s <definition_file> <output_file> <start_definition_idx> <end_definition_idx>\n", argv[0]);
     }
     FILE *input_file, *output_file;
     input_file = fopen(argv[1], "r");
@@ -261,7 +274,8 @@ int main(int argc, char * argv[]) {
     init_sequence();
 
     while (load_def(input_file)) {
-        run(output_file);
+        if (req.block_id > start_idx && req.block_id < end_idx)
+            run(output_file);
     }
 
     fclose(input_file);
