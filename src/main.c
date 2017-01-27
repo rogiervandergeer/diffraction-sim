@@ -244,7 +244,7 @@ int main(int argc, char * argv[]) {
         start_idx = atoi(argv[4]);
         end_idx = atoi(argv[5]);
     } else {
-        printf("Usage:");
+        printf("Usage:\n");
         printf("%s <definition_file> <output_file>\n", argv[0]);
         printf("%s <definition_file> <output_file> <definition_idx>\n", argv[0]);
         printf("%s <definition_file> <output_file> <start_definition_idx> <end_definition_idx>\n", argv[0]);
