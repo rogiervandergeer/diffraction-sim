@@ -248,6 +248,7 @@ int main(int argc, char * argv[]) {
         printf("%s <definition_file> <output_file>\n", argv[0]);
         printf("%s <definition_file> <output_file> <definition_idx>\n", argv[0]);
         printf("%s <definition_file> <output_file> <start_definition_idx> <end_definition_idx>\n", argv[0]);
+        return 1;
     }
     FILE *input_file, *output_file;
     input_file = fopen(argv[1], "r");
