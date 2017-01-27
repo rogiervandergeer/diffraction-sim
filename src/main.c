@@ -162,7 +162,6 @@ int read_plate(const PlateDef* pd) {
 
 int load_def(FILE* fp) {
     PlateDef pd;
-    printf("Reading definition line\n");
     int vals = fscanf(fp,
             "%i, %i, %lf, %lf, %lf, %lf, %i, %lf, %lf, %lf, %lf, %lf, %s",
             &req.block_id,
@@ -172,12 +171,15 @@ int load_def(FILE* fp) {
             &def.sensor.position.x, &def.sensor.position.y, &def.sensor.position.z,
             &def.wavelength, pd.filename);
     if (vals <= 0) return 0;
-    printf("Reading plate, %s\n", pd.filename);
-    if (read_plate(&pd)) {
-        push_definition();
-        return 1;
+    if (req.block_id >= start_idx && req.block_id <= end_idx) {
+        printf("Reading plate, %s\n", pd.filename);
+        if (read_plate(&pd)) {
+            push_definition();
+            return 1;
+        } else return 0;
+    } else {
+        return load_def(fp);
     }
-    return 0;
 }
 
 void assign(const unsigned core_id,
@@ -238,11 +240,11 @@ int main(int argc, char * argv[]) {
         start_idx = 0;
         end_idx = INT_MAX;
     } else if (argc == 4) {
-        start_idx = atoi(argv[4]);
+        start_idx = atoi(argv[3]);
         end_idx = start_idx;
     } else if (argc == 5) {
-        start_idx = atoi(argv[4]);
-        end_idx = atoi(argv[5]);
+        start_idx = atoi(argv[3]);
+        end_idx = atoi(argv[4]);
     } else {
         printf("Usage:\n");
         printf("%s <definition_file> <output_file>\n", argv[0]);
@@ -275,9 +277,10 @@ int main(int argc, char * argv[]) {
     init_sequence();
 
     while (load_def(input_file)) {
-        if (req.block_id > start_idx && req.block_id < end_idx)
-            run(output_file);
+        run(output_file);
     }
+
+    printf("Done.\n");
 
     fclose(input_file);
     fclose(output_file);
