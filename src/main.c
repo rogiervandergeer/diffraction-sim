@@ -15,7 +15,6 @@ e_mem_t emem_def;
 
 Request req;
 Definition def;
-unsigned start_idx, end_idx;
 
 int n_rows, n_cols;
 
@@ -160,7 +159,7 @@ int read_plate(const PlateDef* pd) {
 
 
 
-int load_def(FILE* fp) {
+int load_def(FILE* fp, const int start_idx, const int end_idx) {
     PlateDef pd;
     int vals = fscanf(fp,
             "%i, %i, %lf, %lf, %lf, %lf, %i, %lf, %lf, %lf, %lf, %lf, %s",
@@ -233,7 +232,8 @@ void run(FILE* of) {
 }
 
 int main(int argc, char * argv[]) {
-    printf("Starting\n");
+    FILE *input_file, *output_file;
+    unsigned start_idx, end_idx;
 
     // Handle arguments and open files
     if (argc == 3) {
@@ -252,7 +252,6 @@ int main(int argc, char * argv[]) {
         printf("%s <definition_file> <output_file> <start_definition_idx> <end_definition_idx>\n", argv[0]);
         return 1;
     }
-    FILE *input_file, *output_file;
     input_file = fopen(argv[1], "r");
     if (!input_file) {
         printf("Unable to open '%s' for reading.\n", argv[1]);
@@ -264,6 +263,8 @@ int main(int argc, char * argv[]) {
         return 2;
     }
 
+    // Initialize epiphany
+    printf("Initializing.\n");
     init_epiphany(&platform);
 
     rows = platform.rows;
@@ -271,17 +272,18 @@ int main(int argc, char * argv[]) {
     ncores = rows * cols;
 
     e_alloc(&emem_req, OFFSET_SHA_H, sizeof(Request));
-    e_alloc(&emem_def, OFFSET_SHA_H+sizeof(Request), sizeof(Definition));
+    e_alloc(&emem_def, OFFSET_SHA_H + sizeof(Request), sizeof(Definition));
 
     init_workgroup(&dev);
     init_sequence();
 
-    while (load_def(input_file)) {
+    // Run
+    while (load_def(input_file, start_idx, end_idx)) {
         run(output_file);
     }
 
+    // Clean up
     printf("Done.\n");
-
     fclose(input_file);
     fclose(output_file);
     halt_sequence();
