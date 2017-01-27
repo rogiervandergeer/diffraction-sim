@@ -247,9 +247,9 @@ int main(int argc, char * argv[]) {
         end_idx = atoi(argv[4]);
     } else {
         printf("Usage:\n");
-        printf("%s <definition_file> <output_file>\n", argv[0]);
-        printf("%s <definition_file> <output_file> <definition_idx>\n", argv[0]);
-        printf("%s <definition_file> <output_file> <start_definition_idx> <end_definition_idx>\n", argv[0]);
+        printf("%s <source_file> <output_file>\n", argv[0]);
+        printf("%s <source_file> <output_file> <definition_idx>\n", argv[0]);
+        printf("%s <source_file> <output_file> <start_source_idx> <end_source_idx>\n", argv[0]);
         return 1;
     }
     input_file = fopen(argv[1], "r");
