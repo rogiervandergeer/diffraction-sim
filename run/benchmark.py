@@ -4,6 +4,7 @@
 def main(*argv):
     from argparse import ArgumentParser
     from control.definition import create_plates, read_definitions
+    from control.image import read_images
     from control.utils import create_folders
     from control.benchmark import benchmark
 
@@ -17,7 +18,11 @@ def main(*argv):
     for definition in read_definitions('sources/benchmark.json'):
         for opt in range(4):
             s = benchmark(definition.block_id, opt)
+            # TODO: compare time, calculate time per cycle
             print(s)
+            reference = read_images('reference/benchmark{i}.csv'.format(i=definition.block_id))[0]
+            subject = read_images('output/benchmark.csv')[0]
+            print(reference.compare(subject))
 
 
 if __name__ == '__main__':
