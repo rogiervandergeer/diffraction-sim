@@ -27,10 +27,42 @@ def read_images(filename):
         df['value'] = df['x'].astype('complex') + complex(0, 1) * df['y'].astype('complex')
     else:
         df['value'] = df['x']
-    return [
+    return sorted([
         Image.from_df(block_df, block_id=block_id)
         for block_id, block_df in df.groupby('block_id')
-    ]
+    ], key=lambda img: img.block_id)
+
+
+def compare_images(reference_file, comparison_file, tolerance=None):
+    """Compare the images in two files.
+
+    Args:
+        reference_file (str): Filename of the reference file.
+        comparison_file (str): Filename of file to compare with the reference.
+        tolerance (float/None): Mean absolute deviation per pixel tolerated.
+            If None, then any deviation is tolerated.
+
+    Raises:
+        ValueError: if the difference between two images exceeds the tolerance.
+        IndexError: if the number of images in the files does not match.
+
+    Returns:
+        list[float], the mean absolute difference per pixel, per image
+    """
+    reference_images = read_images(reference_file)
+    comparison_images = read_images(comparison_file)
+
+    retval = []
+    for ref, comp in zip(reference_images, comparison_images):
+        if ref.block_id != comp.block_id:
+            print('Warning: comparing images with unequal block ids!')
+        diff = ref.compare(comp)
+        retval.append(diff)
+        if tolerance and diff > tolerance:
+            raise ValueError('Images do not match! Difference is {d}. (Block id {b}).'.format(d=diff, b=ref.block_id))
+    if len(reference_images) != len(comparison_images):
+        raise IndexError('Unequal number of images in files!')
+    return retval
 
 
 class Image:
