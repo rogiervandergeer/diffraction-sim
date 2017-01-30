@@ -50,6 +50,13 @@ class Definition:
         return self.data['id']
 
     @property
+    def iterations(self):
+        return (
+            self.data['plate']['dimension']**2 *
+            self.data['sensor']['dimension']
+        )
+
+    @property
     def plate(self):
         definition = {
             'dimension': self.data['plate']['dimension'],
