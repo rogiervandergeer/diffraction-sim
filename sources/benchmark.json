@@ -25,9 +25,8 @@
       "diameter": 0.1,
       "position": [0, 0, 50],
       "definition": {
-        "type": "BandPlate",
-        "inner_diameter": 0,
-        "outer_diameter": 0.05
+        "type": "CirclePlate",
+        "circle_diameter": 0.10
       }
     },
     "sensor": {
@@ -46,7 +45,7 @@
       "definition": {
         "type": "BandPlate",
         "inner_diameter": 0,
-        "outer_diameter": 0.05
+        "outer_diameter": 0.10
       }
     },
     "sensor": {

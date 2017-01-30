@@ -14,4 +14,4 @@ def write_benchmark(data):
 
 def benchmark(benchmark_id, optimisation):
     build(optimisation=optimisation)
-    return run('plates/benchmark.csv', 'output/benchmark.csv', definition_id=benchmark_id)
+    return run('definitions/benchmark.csv', 'output/benchmark.csv', definition_id=benchmark_id)

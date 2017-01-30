@@ -65,7 +65,7 @@ class Definition:
         values = [self.data['id']] \
             + [self.data['plate']['dimension'], self.data['plate']['diameter']] \
             + self.data['plate']['position'] \
-            + [self.data['sensor']['dimension'] + self.data['sensor']['diameter']] \
+            + [self.data['sensor']['dimension'], self.data['sensor']['diameter']] \
             + self.data['sensor']['position'] \
             + [self.data['wavelength'], self.plate_file]
         return ', '.join(str(val) for val in values) + '\n'
