@@ -177,7 +177,7 @@ int load_def(FILE* fp, const int start_idx, const int end_idx) {
             return 1;
         } else return 0;
     } else {
-        return load_def(fp);
+        return load_def(fp, start_idx, end_idx);
     }
 }
 
