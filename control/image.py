@@ -33,7 +33,7 @@ def read_images(filename):
     ], key=lambda img: img.block_id)
 
 
-def compare_images(reference_file, comparison_file, tolerance=None):
+def compare_images(reference_file, comparison_file, tolerance=None, check_ids=True):
     """Compare the images in two files.
 
     Args:
@@ -41,6 +41,8 @@ def compare_images(reference_file, comparison_file, tolerance=None):
         comparison_file (str): Filename of file to compare with the reference.
         tolerance (float/None): Mean absolute deviation per pixel tolerated.
             If None, then any deviation is tolerated.
+        check_ids (bool): If True, print a warning if the block ids of the 
+            images do not match. Defaults to True.
 
     Raises:
         ValueError: if the difference between two images exceeds the tolerance.
@@ -54,7 +56,7 @@ def compare_images(reference_file, comparison_file, tolerance=None):
 
     retval = []
     for ref, comp in zip(reference_images, comparison_images):
-        if ref.block_id != comp.block_id:
+        if ref.block_id != comp.block_id and check_ids:
             print('Warning: comparing images with unequal block ids!')
         diff = ref.compare(comp)
         retval.append(diff)

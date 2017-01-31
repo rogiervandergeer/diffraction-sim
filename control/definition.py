@@ -53,7 +53,7 @@ class Definition:
     def iterations(self):
         return (
             self.data['plate']['dimension']**2 *
-            self.data['sensor']['dimension']
+            self.data['sensor']['dimension']**2
         )
 
     @property
