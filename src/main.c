@@ -131,9 +131,10 @@ void read(const int core_id, FILE* of) {
 int read_plate(const PlateDef* pd) {
     // Read in a plate from a plate CSV.
     FILE *fp = fopen(pd->filename, "r");
-    char buffer[1024] ;
+    char buffer[8196] ;
     char *record, *line;
     int i=0, j=0;
+    int val;
     if (fp == NULL) {
         printf("Unable to read plate definition file \"%s\".\n", pd->filename);
         return 0;
@@ -143,7 +144,16 @@ int read_plate(const PlateDef* pd) {
             j = 0;
             record = (char*)strtok(line, ",");
             while (record != NULL) {
-                // TODO: check max 255.
+                val = (char)atoi(record);
+                if (val > 255 || val < 0) {
+                    printf("Invalid value!");
+                }
+                if (i >= PLATE_SIZE || j >= PLATE_SIZE) {
+                    printf("Out of memory bounds!");
+                }
+                if (i >= def.plate.dimension || j >= def.plate.dimension) {
+                    printf("Out of bounds! (%i, %i)", i, j);
+                }
                 // TODO: check plate dimension.
                 def.transparency[i*PLATE_SIZE+j++] = (char)atoi(record); 
                 // printf("Writing %i to (%i, %i).\n", atoi(record), i, j);
