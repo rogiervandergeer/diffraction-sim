@@ -34,7 +34,7 @@ class SlitPlate(Plate):
             raise ValueError('all dimensions must be positive')
         if self.distance < self.width and self.n_slits > 1:
             raise ValueError('slits overlap')
-        if self.n_slits * self.distance + self.width > self.diameter:
+        if (self.n_slits-1) * self.distance + self.width > self.diameter:
             raise ValueError('slits do not fit')
 
     def opacity(self, x, y):
