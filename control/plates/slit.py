@@ -2,9 +2,25 @@ from control.plates import Plate
 
 
 class SlitPlate(Plate):
+    """Describes a plate with a number of parallel rectangular slits.
 
-    def __init__(self, diameter, dimension, tool_size,
-                 n_slits, width, height, distance):
+    Args:
+        diameter (float): Physical diameter of the plate.
+        dimension (int): Number of points along each of the axes of the plate.
+        n_slits (int): Number of slits. Must be at least 1.
+        width (float): Width of the slits.
+        height (float): Height of the slits.
+        tool_size (float/None): Tool size used to construct the plate. Any concave
+            edges with a diameter smaller than the tool size will be rounded such
+            that they can be created with a circular tool (i.e. drill). If None,
+            do not apply tooling. Defaults to None.
+        distance (float): Distance between the centers of the slits. If N_slits > 1
+            this must be larger than the width of the slits. Defaults to 0.
+    """
+
+    def __init__(self, diameter, dimension,
+                 n_slits, width, height,
+                 tool_size=None, distance=0.):
         self.n_slits = n_slits
         self.width = width
         self.height = height
@@ -18,7 +34,7 @@ class SlitPlate(Plate):
             raise ValueError('all dimensions must be positive')
         if self.distance < self.width and self.n_slits > 1:
             raise ValueError('slits overlap')
-        if self.n_slits * self.distance + self.width > self.diameter:
+        if (self.n_slits-1) * self.distance + self.width > self.diameter:
             raise ValueError('slits do not fit')
 
     def opacity(self, x, y):

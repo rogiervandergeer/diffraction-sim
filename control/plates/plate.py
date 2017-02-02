@@ -1,6 +1,9 @@
-import numpy as np
+from abc import abstractmethod
 from math import sqrt
+
+import numpy as np
 from matplotlib.pyplot import imshow, figure
+
 from control.plates.tooling import tooled
 
 
@@ -11,6 +14,13 @@ class Plate:
         self.dimension = dimension
         self.tool_size = tool_size
         self.check()
+
+    def __repr__(self):
+        return '{cls}({vars})'.format(
+            cls=self.__class__.__name__,
+            vars=', '.join(sorted('{k}={v}'.format(k=k, v=repr(v))
+                                  for k, v in self.__dict__.items()))
+        )
 
     @classmethod
     def create(cls, definition):
@@ -25,6 +35,8 @@ class Plate:
         Returns:
             Plate: an instance of one of the sub-types of Plate
         """
+        if 'type' not in definition:
+            raise ValueError('Cannot create plate: no type specified.')
         sub_cls = cls.select(definition['type'])
         return sub_cls(
             **{key: val for key, val in definition.items()  if key != 'type'}
@@ -38,6 +50,11 @@ class Plate:
         raise ValueError('No such plate class:', name)
 
     def build(self):
+        """Build the plate.
+
+        Returns:
+            numpy.array
+        """
         raw = np.array([
             [self.calc(row, col) for col in range(self.dimension)]
             for row in range(self.dimension)
@@ -47,23 +64,55 @@ class Plate:
         return tooled(raw, self.tool_size/self.delta)
 
     def calc(self, row, col):
+        """Calculate the opacity of a point.
+
+        Args:
+            row (int): Row index of the point.
+            col (int): Column index of the point.
+
+        Returns:
+            float
+        """
         return self.opacity(x=self.position(col), y=self.position(row))
 
+    @abstractmethod
     def check(self):
         pass
 
+    @abstractmethod
     def opacity(self, x, y):
         return 0
 
     @property
     def delta(self):
+        """Compute the distance between points on the plate.
+
+        Returns:
+            float
+        """
         return self.diameter / self.dimension
 
     def position(self, index):
+        """Compute the position along either of the axes at a given point.
+
+        Args:
+            index (int): Index along the axis of the given point.
+
+        Returns:
+            float
+        """
         return self.delta * (index - (0.5*(self.dimension - 1)))
 
-    def show(self, figsize=(10, 10)):
-        fig = figure(figsize=figsize)
+    def show(self, fig_size=(10, 10)):
+        """Compute an image of the plate.
+
+        Args:
+            fig_size (tuple[float]): Size of the figure. Defaults to (10, 10).
+
+        Returns:
+            pyplot.figure
+        """
+        fig = figure(figsize=fig_size)
         ax = imshow(self.build(), cmap='gray')
         ax.axes.get_xaxis().set_visible(False)
         ax.axes.get_yaxis().set_visible(False)

@@ -1,7 +1,8 @@
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <e-hal.h> 
+#include <e-hal.h>
 
 #include "shared.h"
 
@@ -127,45 +128,67 @@ void read(const int core_id, FILE* of) {
 }
 
 
-void calc(const PlateDef* pd) {
-    int i, j, t;
-    double x, y, rsq;
-    // TODO: check max dimension
-    for (i=0; i<def.plate.dimension; ++i) {
-        x = loc(def.plate.diameter, def.plate.dimension, i);
-        for (j=0; j<def.plate.dimension; ++j) {
-            y = loc(def.plate.diameter, def.plate.dimension, j);
-            rsq = x*x + y*y;
-            if (rsq < pd->inner_radius * pd->inner_radius) {
-                t = 0;
-            } else if (rsq > pd->outer_radius * pd->outer_radius) {
-                t = 0;
-            } else{
-                t = 255;
+int read_plate(const PlateDef* pd) {
+    // Read in a plate from a plate CSV.
+    FILE *fp = fopen(pd->filename, "r");
+    char buffer[8196] ;
+    char *record, *line;
+    int i=0, j=0;
+    int val;
+    if (fp == NULL) {
+        printf("Unable to read plate definition file \"%s\".\n", pd->filename);
+        return 0;
+    } else {
+        printf("Reading plate definition file.\n");
+        while ((line=fgets(buffer, sizeof(buffer), fp)) != NULL) {
+            j = 0;
+            record = (char*)strtok(line, ",");
+            while (record != NULL) {
+                val = (char)atoi(record);
+                if (val > 255 || val < 0) {
+                    printf("Invalid value!");
+                }
+                if (i >= PLATE_SIZE || j >= PLATE_SIZE) {
+                    printf("Out of memory bounds!");
+                }
+                if (i >= def.plate.dimension || j >= def.plate.dimension) {
+                    printf("Out of bounds! (%i, %i)", i, j);
+                }
+                // TODO: check plate dimension.
+                def.transparency[i*PLATE_SIZE+j++] = (char)atoi(record); 
+                // printf("Writing %i to (%i, %i).\n", atoi(record), i, j);
+                record = (char*)strtok(NULL,",");
             }
-                    fprintf(stdout, "x, y, t = %f, %f, %i (rsq=%f)\n", x, y, t, rsq); 
-            def.transparency[i*PLATE_SIZE+j] = (char) t;
+            ++i;
+            // TODO: check plate dimension.
         }
+        fclose(fp);
+        return 1;
     }
 }
 
 
 
-int load_def(FILE* fp) {
+int load_def(FILE* fp, const int start_idx, const int end_idx) {
     PlateDef pd;
     int vals = fscanf(fp,
-            "%i, %i, %lf, %lf, %lf, %lf, %i, %lf, %lf, %lf, %lf, %lf, %lf, %lf",
+            "%i, %i, %lf, %lf, %lf, %lf, %i, %lf, %lf, %lf, %lf, %lf, %s",
             &req.block_id,
             &def.plate.dimension, &def.plate.diameter,
             &def.plate.position.x, &def.plate.position.y, &def.plate.position.z,
             &def.sensor.dimension, &def.sensor.diameter,
             &def.sensor.position.x, &def.sensor.position.y, &def.sensor.position.z,
-            &def.wavelength,
-            &pd.inner_radius, &pd.outer_radius);
+            &def.wavelength, pd.filename);
     if (vals <= 0) return 0;
-    calc(&pd);
-    push_definition();
-    return 1;
+    if (req.block_id >= start_idx && req.block_id <= end_idx) {
+        printf("Reading plate, %s\n", pd.filename);
+        if (read_plate(&pd)) {
+            push_definition();
+            return 1;
+        } else return 0;
+    } else {
+        return load_def(fp, start_idx, end_idx);
+    }
 }
 
 void assign(const unsigned core_id,
@@ -219,13 +242,26 @@ void run(FILE* of) {
 }
 
 int main(int argc, char * argv[]) {
+    FILE *input_file, *output_file;
+    unsigned start_idx, end_idx;
 
     // Handle arguments and open files
-    if (argc != 3) {
-        printf("Usage: %s <definition> <output>\n", argv[0]);
+    if (argc == 3) {
+        start_idx = 0;
+        end_idx = INT_MAX;
+    } else if (argc == 4) {
+        start_idx = atoi(argv[3]);
+        end_idx = start_idx;
+    } else if (argc == 5) {
+        start_idx = atoi(argv[3]);
+        end_idx = atoi(argv[4]);
+    } else {
+        printf("Usage:\n");
+        printf("%s <source_file> <output_file>\n", argv[0]);
+        printf("%s <source_file> <output_file> <definition_idx>\n", argv[0]);
+        printf("%s <source_file> <output_file> <start_source_idx> <end_source_idx>\n", argv[0]);
         return 1;
     }
-    FILE *input_file, *output_file;
     input_file = fopen(argv[1], "r");
     if (!input_file) {
         printf("Unable to open '%s' for reading.\n", argv[1]);
@@ -237,6 +273,8 @@ int main(int argc, char * argv[]) {
         return 2;
     }
 
+    // Initialize epiphany
+    printf("Initializing.\n");
     init_epiphany(&platform);
 
     rows = platform.rows;
@@ -244,15 +282,18 @@ int main(int argc, char * argv[]) {
     ncores = rows * cols;
 
     e_alloc(&emem_req, OFFSET_SHA_H, sizeof(Request));
-    e_alloc(&emem_def, OFFSET_SHA_H+sizeof(Request), sizeof(Definition));
+    e_alloc(&emem_def, OFFSET_SHA_H + sizeof(Request), sizeof(Definition));
 
     init_workgroup(&dev);
     init_sequence();
 
-    while (load_def(input_file)) {
+    // Run
+    while (load_def(input_file, start_idx, end_idx)) {
         run(output_file);
     }
 
+    // Clean up
+    printf("Done.\n");
     fclose(input_file);
     fclose(output_file);
     halt_sequence();

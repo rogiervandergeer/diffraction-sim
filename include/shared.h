@@ -56,8 +56,7 @@ typedef struct __attribute__((aligned(8))) {
 } Definition;
 
 typedef struct {
-    double inner_radius;
-    double outer_radius;
+    char filename[256];
 } PlateDef;
 
 typedef struct __attribute__((aligned(8))) {
